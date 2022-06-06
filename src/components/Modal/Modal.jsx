@@ -5,27 +5,31 @@ import { createPortal } from 'react-dom';
 const modalRoot = document.getElementById('modal');
 
 const Modal = ({ modalItem, closeModal }) => {
-  useEffect(() => {
-    window.addEventListener('keydown', Esc);
+ 
 
-    return () => window.removeEventListener('keydown', Esc);
-  }, []);
-
-  const Click = e => {
+  const click = e => {
     if (e.currentTarget === e.target) {
       closeModal();
     }
   };
-  const Esc = e => {
-    if (e.code === 'Escape') {
-      closeModal();
-    }
-  };
+ 
+
+  useEffect(() => {
+    const esc = e => {
+      if (e.code === 'Escape') {
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', esc);
+
+
+    return () => window.removeEventListener('keydown', esc);
+  }, [closeModal]);
 
   const { largeImageURL, tags } = modalItem;
 
   return createPortal(
-    <div onClick={Click} className="Overlay">
+    <div onClick={click} className="Overlay">
       <div className="Modal">
         <img src={largeImageURL} alt={tags} />
       </div>

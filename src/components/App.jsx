@@ -11,15 +11,22 @@ import ModalProvider from 'contex/ModalProvider';
 import { key } from 'key/api';
 
 const App = () => {
-  const [data, setData] = useState([]);
+  const [image, setImages] = useState({
+    isLoading: false,
+    error: null,
+    data: [],
+  });
+
   const [total, setTotal] = useState(null);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+
+  /*  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [data, setImages] = useState([]); */
 
   const onSubmit = input => {
-    setData([]);
+    setImages(prev => ({...prev, data:[]}));
     setQ(input);
     setPage(1);
     window.scrollTo({
@@ -29,22 +36,24 @@ const App = () => {
   };
 
   const imageSearch = ({ q, page }) => {
-    setIsLoading(true);
+    setImages(prevState => ({ ...prevState, isLoading: true, error:null}));
 
     key({ q, page })
       .then(data => {
         if (!data.hits.length && q) {
           throw new Error('По вашему запросу ничего не найдено');
         }
-        setData(prev => [...prev, ...data.hits]);
+
+        setImages(prev => ({
+          ...prev,
+          data: [...prev.data, ...data.hits],
+          isLoading: false,
+        }));
         setTotal(data.totalHits);
       })
       .catch(err => {
         console.log(err);
-        setError(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
+        setImages(prev => ({ ...prev, error: err, isLoading: false }));
       });
   };
 
@@ -53,8 +62,11 @@ const App = () => {
   };
 
   useEffect(() => {
+    if (!q) {
+      return;
+    }
     imageSearch({ q, page });
-  }, [page, q]);
+  }, [q, page]);
 
   useEffect(() => {
     if (page > 1) {
@@ -63,9 +75,11 @@ const App = () => {
         behavior: 'smooth',
       });
     }
-  });
+  }, [page]);
 
-  const showLoadMoreBtn = total > data.length && data.length > 0;
+  const showLoadMoreBtn = total > image.data.length && image.data.length > 0;
+  const { error, isLoading, data } = image;
+  console.log(data);
   return (
     <>
       <SearchBar onSubmit={onSubmit} />

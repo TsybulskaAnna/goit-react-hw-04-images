@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import '../styles/styles.scss';
+
 import SearchBar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Loader from './Loader/Loader';
 import LoadMoreBtn from './Button/Button';
-/* import Modal from './Modal/Modal'; */
+import Modal from './Modal/Modal';
 import Err from './Error/Err';
-import ModalProvider from 'contex/ModalProvider';
 
 import { key } from 'key/api';
 
@@ -15,6 +15,10 @@ const App = () => {
     isLoading: false,
     error: null,
     data: [],
+  });
+  const [modal, setModal] = useState({
+    modalBody: {},
+    isModalOpen: false,
   });
 
   const [total, setTotal] = useState(null);
@@ -26,7 +30,7 @@ const App = () => {
   const [data, setImages] = useState([]); */
 
   const onSubmit = input => {
-    setImages(prev => ({...prev, data:[]}));
+    setImages(prev => ({ ...prev, data: [] }));
     setQ(input);
     setPage(1);
     window.scrollTo({
@@ -36,7 +40,7 @@ const App = () => {
   };
 
   const imageSearch = ({ q, page }) => {
-    setImages(prevState => ({ ...prevState, isLoading: true, error:null}));
+    setImages(prevState => ({ ...prevState, isLoading: true, error: null }));
 
     key({ q, page })
       .then(data => {
@@ -77,19 +81,39 @@ const App = () => {
     }
   }, [page]);
 
+  const showModal = modalBody => {
+    setModal({
+      isModalOpen: true,
+      modalBody,
+    });
+  };
+
+  const closeModal = () => {
+    setModal(prevState => {
+      return { ...prevState, isModalOpen: false };
+    });
+  };
+
+  const { modalBody, isModalOpen } = modal;
+
   const showLoadMoreBtn = total > image.data.length && image.data.length > 0;
   const { error, isLoading, data } = image;
-  console.log(data);
   return (
     <>
       <SearchBar onSubmit={onSubmit} />
+
       {error && <Err message={error.message} />}
+
       {isLoading && <Loader />}
-      {!error && (
-        <ModalProvider>
-          <ImageGallery items={data} />
-          {showLoadMoreBtn && <LoadMoreBtn handleClick={loadMoreBtn} />}
-        </ModalProvider>
+
+      <ImageGallery items={data} onClick={showModal} />
+
+      {!error && showLoadMoreBtn && <LoadMoreBtn handleClick={loadMoreBtn} />}
+
+      {isModalOpen && (
+        <Modal onClose={closeModal}>
+          <img src={modalBody.largeImageURL} alt={modalBody.tag} width="800" />
+        </Modal>
       )}
     </>
   );

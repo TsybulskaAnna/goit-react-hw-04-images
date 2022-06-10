@@ -1,19 +1,25 @@
 import PropTypes from 'prop-types';
-import { useModalContext } from '../../contex/ModalProvider'
 
-const ImageGalleryItem = ({ item }) => {
-  const openModal = useModalContext();
-
-  const { tags, webformatURL } = item;
+const ImageGalleryItem = ({ items, onClick}) => {
+  const elements = items.map(({ id, webformatURL, largeImageURL, tag }) => {
+    
   return (
-    <li onClick={() => openModal(item)} className="ImageGalleryItem">
-      <img className="ImageGalleryItem-image" src={webformatURL} alt={tags} />
+    <li key ={id} onClick={() => onClick({ largeImageURL, tag })} className="ImageGalleryItem">
+      <img className="ImageGalleryItem-image" src={webformatURL} alt={tag} />
     </li>
   );
-};
-
+})
+return elements;
+}
 export default ImageGalleryItem;
 
 ImageGalleryItem.propTypes = {
-  item: PropTypes.object.isRequired,
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+    })
+  ),
+  onClick: PropTypes.func.isRequired,
 };

@@ -21,6 +21,8 @@ const App = () => {
     isModalOpen: false,
   });
 
+  
+
   const [total, setTotal] = useState(null);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState('');
